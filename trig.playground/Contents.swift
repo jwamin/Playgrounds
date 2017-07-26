@@ -313,6 +313,17 @@ class DrawView : UIView{
         self.addSubview(angle2Label)
         self.addSubview(angle3Label)
 
+        //Create arithmetic label
+        let arithLabel = UILabel()
+        
+        arithLabel.text = "\(String(Int(round(triangle.oa!))))° + \(String(Int(round(triangle.aa!))))° + \(String(Int(round(triangle.rightAngle))))° = \(String(Int(round(triangle.oa! + triangle.aa! + triangle.rightAngle))))°"
+        arithLabel.frame = CGRect(origin: thetaPoint,
+                                  size:CGSize(width: Int(triangle.a), height: 20))
+        
+        arithLabel.frame.origin.y += CGFloat(100.0)
+        arithLabel.textAlignment = .center
+        self.addSubview(arithLabel)
+        
     }
 }
 
