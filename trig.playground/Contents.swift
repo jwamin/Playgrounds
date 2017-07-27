@@ -20,7 +20,7 @@ class ViewController:UIViewController{
         self.view = DrawView(frame: self.view.frame, triangle: myTriangle)
         print(self.view.clearsContextBeforeDrawing)
         myTriangle.recalculate()
-        print(myTriangle.rightAngle,myTriangle.oa!,myTriangle.aa!,myTriangle.sum!,"area = \(myTriangle.area!)")
+        
         
         let slider = UISlider(frame: CGRect(x: 0, y: 0, width: 200, height: 20 ))
         slider.maximumValue = 500
@@ -74,11 +74,8 @@ class Triangle {
             self.recalculate()
         }
     }
-    var h:Float{
-        didSet{
-            self.recalculate()
-        }
-    }
+    var h:Float!
+    
     let rightAngle:Float = 90.0;
     
     var oa:Float?,aa:Float?
@@ -106,12 +103,12 @@ class Triangle {
     func recalculate(){
         
         area = o * a / 2
-        
+        h = Triangle.doHyp(o: o, a: a)
         oa = Triangle.radToDegrees(asin(o / h))
         aa = Triangle.radToDegrees(atan(a / o))
         
         sum = oa! + aa! + rightAngle
-        
+        print(rightAngle,oa!,aa!,sum!,"area = \(area!)")
     }
     
 }
@@ -316,7 +313,11 @@ class DrawView : UIView{
         //Create arithmetic label
         let arithLabel = UILabel()
         
-        arithLabel.text = "\(String(Int(round(triangle.oa!))))° + \(String(Int(round(triangle.aa!))))° + \(String(Int(round(triangle.rightAngle))))° = \(String(Int(round(triangle.oa! + triangle.aa! + triangle.rightAngle))))°"
+        if let oa = triangle.oa, let aa = triangle.aa {
+        arithLabel.text = "\(String(Int(round(oa))))° + \(String(Int(round(aa))))° + \(String(Int(round(triangle.rightAngle))))° = \(String(Int(round(oa + aa + triangle.rightAngle))))°"
+        } else {
+            print("something was nil")
+        }
         arithLabel.frame = CGRect(origin: thetaPoint,
                                   size:CGSize(width: Int(triangle.a), height: 20))
         
