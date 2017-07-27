@@ -5,9 +5,9 @@ import PlaygroundSupport
 var str = "Hello, playground"
 
 /*
- SOH sin = opp / hyp
- CAH cos = adj / hyp
- TOA tan = opp / adj
+ SOH sin(theta) = opp / hyp (asin for angle)
+ CAH cos(theta) = adj / hyp (acos for angle)
+ TOA tan(theta) = opp / adj (atan for angle)
  */
 
 class ViewController:UIViewController{
@@ -15,50 +15,50 @@ class ViewController:UIViewController{
     var myTriangle:Triangle!
     
     override func viewDidLoad() {
+        
         myTriangle = Triangle(opposite: 134, adjacent: 250)
         
         self.view = DrawView(frame: self.view.frame, triangle: myTriangle)
-        print(self.view.clearsContextBeforeDrawing)
+
         myTriangle.recalculate()
         
+        //create sliders
         
         let slider = UISlider(frame: CGRect(x: 0, y: 0, width: 200, height: 20 ))
         slider.maximumValue = 500
         slider.minimumValue = 10
-        slider.addTarget(self, action: #selector(updateOpposite), for: UIControlEvents.valueChanged)
+        slider.tag = 1
+        slider.value = myTriangle.o
+        slider.addTarget(self, action: #selector(updateDimension), for: UIControlEvents.valueChanged)
         self.view.addSubview(slider)
         
         let slider2 = UISlider(frame: CGRect(x: 0, y: 100, width: 200, height: 20))
             slider2.maximumValue = 500
             slider2.minimumValue = 10
-            slider2.addTarget(self, action: #selector(updateAdj), for: UIControlEvents.valueChanged)
+            slider2.value = myTriangle.a
+            slider2.tag = 2
+            slider2.addTarget(self, action: #selector(updateDimension), for: UIControlEvents.valueChanged)
             self.view.addSubview(slider2)
     }
     
     
-    func updateOpposite(sender:Any){
+    func updateDimension(sender:Any){
         let slider = sender as! UISlider
         
-        
+        switch (slider.tag){
+        case 1:
             myTriangle.o = slider.value
+        case 2:
+            myTriangle.a = slider.value
+        default:
+            print("issue")
+        }
+        
             view.setNeedsDisplay()
-        
-        
-        
         
     }
     
-    func updateAdj(sender:Any){
-        let slider = sender as! UISlider
-        
-        
-        myTriangle.a = slider.value
-        
-        
-        view.setNeedsDisplay()
-        
-        
-    }
+
     
 }
 
@@ -79,6 +79,8 @@ class Triangle {
     let rightAngle:Float = 90.0;
     
     var oa:Float?,aa:Float?
+    var oaRad:Float?,aaRad:Float?
+    
     var area:Float?
     var sum:Float?
     
@@ -107,8 +109,14 @@ class Triangle {
         oa = Triangle.radToDegrees(asin(o / h))
         aa = Triangle.radToDegrees(atan(a / o))
         
-        sum = oa! + aa! + rightAngle
-        print(rightAngle,oa!,aa!,sum!,"area = \(area!)")
+        if let aAngle = aa, let oAngle = oa{
+            oaRad = oAngle * Triangle.radians
+            aaRad = aAngle * Triangle.radians
+            sum = oa! + aa! + rightAngle
+            //print(rightAngle,oAngle,aAngle,sum!,"area = \(area!)")
+        }
+        
+        
     }
     
 }
@@ -116,7 +124,11 @@ class Triangle {
 class DrawView : UIView{
     
     var triangle:Triangle!
+    
     let debug = false;
+    
+    var angleLabel:UILabel = UILabel(), angle2Label:UILabel = UILabel(), angle3Label:UILabel = UILabel(), oLabel:UILabel = UILabel(), aLabel:UILabel = UILabel(), hLabel:UILabel = UILabel()
+    
     init(frame: CGRect, triangle: Triangle) {
         super.init(frame: frame)
         self.clearsContextBeforeDrawing = true
@@ -132,26 +144,27 @@ class DrawView : UIView{
         let views = self.subviews
         
         for view in views{
+            //is keyword, really cool IsKindOfClass in Swift!
             if view is UILabel {
-                view.removeFromSuperview()
+                let label = view as! UILabel
+                label.text = nil
             }
         }
     }
     
     override func draw(_ rect: CGRect) {
         
-        clearLabels()
-
         
+
         //establish context
         let context = UIGraphicsGetCurrentContext()
 
-        // Create paths
+        // Create paths, separate one for each color
         let opath = UIBezierPath()
         let apath = UIBezierPath()
         let hpath = UIBezierPath()
         
-        //Points on
+        //Points of triangle
         let startPoint = CGPoint(x: self.frame.width/2, y: frame.height/4)
         
         var rightPoint = startPoint
@@ -210,7 +223,10 @@ class DrawView : UIView{
         UIColor.green.setStroke()
         hpath.stroke()
         
-        let oLabel = UILabel()
+        
+        clearLabels()
+        
+        //oLabel = UILabel()
         oLabel.text = "opposite"
         oLabel.frame = CGRect(origin: startPoint,
                               size:CGSize(width: 100, height: rightPoint.y - startPoint.y)
@@ -219,7 +235,7 @@ class DrawView : UIView{
         oLabel.textColor = UIColor.black
         
         
-        let aLabel = UILabel()
+        //aLabel = UILabel()
         aLabel.text = "adjacent"
         aLabel.frame = CGRect(origin: rightPoint,
                               size:CGSize(width: thetaPoint.x - rightPoint.x, height: 20)
@@ -239,7 +255,7 @@ class DrawView : UIView{
         labelPoint.y -= 15
         
         //Create hypotenuse label
-        let hLabel = UILabel()
+        //hLabel = UILabel()
         hLabel.text = "hypotenuse"
         hLabel.frame = CGRect(origin: labelPoint,
                               size:CGSize(width: CGFloat(triangle.h), height: 20))
@@ -249,48 +265,52 @@ class DrawView : UIView{
         hLabel.transform = CGAffineTransform(rotationAngle: angleRadians)
         hLabel.textColor = UIColor.black
         
+        
+        /**  Angle Arcs
+         ------------------*/
+        
         //Create angle arcs
         let arc = UIBezierPath()
+        let arc2 = UIBezierPath()
+        let arc3 = UIBezierPath()
+        
         UIColor.black.setStroke()
+        
         arc.addArc(withCenter: thetaPoint, radius: 10, startAngle:angleRadians, endAngle:0, clockwise: true)
         arc.stroke()
         
         let start = CGFloat(90 * Triangle.radians);
-        let end = CGFloat(start + CGFloat(triangle.aa! * Triangle.radians))
-        
-        let arc2 = UIBezierPath()
-        UIColor.black.setStroke()
+        let end = CGFloat(start + CGFloat((triangle.aa ?? 0) * Triangle.radians))
         
         arc2.addArc(withCenter: startPoint, radius: 10, startAngle:CGFloat(90 * Triangle.radians), endAngle:end, clockwise: true)
         arc2.stroke()
         
-        let arc3 = UIBezierPath()
-        UIColor.black.setStroke()
-        
         arc3.addArc(withCenter: rightPoint, radius: 10, startAngle:CGFloat(Double.pi), endAngle:CGFloat((3*Double.pi)/2), clockwise: true)
         arc3.stroke()
         
+        /**  Labels
+         ------------------*/
         
         //Create angle labels
-        let angleLabel = UILabel()
-        angleLabel.font = UIFont(name: "Helvetica Neue", size: 11.0)
+        let angleFont = UIFont(name: "Helvetica Neue", size: 11.0)
+        let angleRect = CGRect(origin: thetaPoint,
+                               size:CGSize(width: 30, height: 20))
+        
+        angleLabel.font = angleFont
         angleLabel.text = String(Int(round(triangle.oa!)))+"°"
-        angleLabel.frame = CGRect(origin: thetaPoint,
-                              size:CGSize(width: 30, height: 20))
+        angleLabel.frame = angleRect
         angleLabel.textAlignment = .center
         
-        let angle2Label = UILabel()
-        angle2Label.font = UIFont(name: "Helvetica Neue", size: 11.0)
+        angle2Label.font = angleFont
         angle2Label.text = String(Int(round(triangle.aa!)))+"°"
-        angle2Label.frame = CGRect(origin: startPoint,
-                                  size:CGSize(width: 30, height: 20))
+        angle2Label.frame = angleRect
+        angle2Label.frame.origin = startPoint
         angle2Label.textAlignment = .center
         
-        let angle3Label = UILabel()
-        angle3Label.font = UIFont(name: "Helvetica Neue", size: 11.0)
+        angle3Label.font = angleFont
         angle3Label.text = String(Int(round(triangle.rightAngle)))+"°"
-        angle3Label.frame = CGRect(origin: rightPoint,
-                                   size:CGSize(width: 30, height: 20))
+        angle3Label.frame = angleRect
+        angle3Label.frame.origin = rightPoint
         angle2Label.textAlignment = .center
         
         if debug {
@@ -313,8 +333,8 @@ class DrawView : UIView{
         //Create arithmetic label
         let arithLabel = UILabel()
         
-        if let oa = triangle.oa, let aa = triangle.aa {
-        arithLabel.text = "\(String(Int(round(oa))))° + \(String(Int(round(aa))))° + \(String(Int(round(triangle.rightAngle))))° = \(String(Int(round(oa + aa + triangle.rightAngle))))°"
+        if let oa = triangle.oa, let aa = triangle.aa, let angleSum = triangle.sum {
+        arithLabel.text = "\(String(Int(round(oa))))° + \(String(Int(round(aa))))° + \(String(Int(round(triangle.rightAngle))))° = \(String(Int(angleSum)))°"
         } else {
             print("something was nil")
         }
