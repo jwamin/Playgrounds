@@ -42,7 +42,7 @@ class ViewController:UIViewController{
     }
     
     
-    func updateDimension(sender:Any){
+    @objc func updateDimension(sender:Any){
         let slider = sender as! UISlider
         
         switch (slider.tag){
@@ -62,6 +62,29 @@ class ViewController:UIViewController{
     
 }
 
+enum Triangles{
+    case Equilateral
+    case Isoceles
+    case Scalene
+    case RightAngle
+    case Acute
+    case Obtuse
+}
+
+class CGTriangle{
+    
+    var A:CGPoint = CGPoint(x: 0, y: 0)
+    var B:CGPoint = CGPoint(x: 0, y: 0)
+    var C:CGPoint = CGPoint(x: 0, y: 0)
+    
+    init(a:CGPoint,b:CGPoint,c:CGPoint){
+        A = a
+        B = b
+        C = c
+    }
+}
+
+
 class Triangle {
     
     var o:Float{
@@ -74,15 +97,16 @@ class Triangle {
             self.recalculate()
         }
     }
-    var h:Float!
+
+    var h:Float = 0
     
-    let rightAngle:Float = 90.0;
+    static let rightAngle:Float = 90.0;
     
-    var oa:Float?,aa:Float?
-    var oaRad:Float?,aaRad:Float?
-    
-    var area:Float?
-    var sum:Float?
+    var oa:Float = 0,aa:Float = 0
+    var oaRad:Float = 0,aaRad:Float = 0
+    var mid:Float = 0
+    var area:Float = 0
+    var sum:Float = 0
     
     static let radians:Float = Float(Double.pi / 180);
     
@@ -104,17 +128,31 @@ class Triangle {
     
     func recalculate(){
         
-        area = o * a / 2
-        h = Triangle.doHyp(o: o, a: a)
         oa = Triangle.radToDegrees(asin(o / h))
         aa = Triangle.radToDegrees(atan(a / o))
         
-        if let aAngle = aa, let oAngle = oa{
-            oaRad = oAngle * Triangle.radians
-            aaRad = aAngle * Triangle.radians
-            sum = oa! + aa! + rightAngle
-            //print(rightAngle,oAngle,aAngle,sum!,"area = \(area!)")
+        mid = 180 - oa - aa
+        
+        if(mid != Triangle.rightAngle){
+            print("obtuse triangle, \(mid)")
+            let midTest = mid / 2
+            print(midTest+Triangle.rightAngle+oa)
+            print(midTest+Triangle.rightAngle+aa)
+            return
+        } else {
+            area = o * a / 2
+            h = Triangle.doHyp(o: o, a: a)
+            
+            oaRad = oa * Triangle.radians
+            aaRad = aa * Triangle.radians
+            sum = oa + aa + mid
         }
+    
+        
+
+        
+            print(mid,oa,aa,sum,"area = \(area)")
+        
         
         
     }
@@ -125,7 +163,7 @@ class DrawView : UIView{
     
     var triangle:Triangle!
     
-    let debug = false;
+    let debug = true;
     
     var angleLabel:UILabel = UILabel(), angle2Label:UILabel = UILabel(), angle3Label:UILabel = UILabel(), oLabel:UILabel = UILabel(), aLabel:UILabel = UILabel(), hLabel:UILabel = UILabel()
     
@@ -246,7 +284,7 @@ class DrawView : UIView{
         
         
         //Calculate angle with radians
-        let angleRadians:CGFloat = CGFloat((360 - triangle.oa!) * Triangle.radians)
+        let angleRadians:CGFloat = CGFloat((360 - triangle.oa) * Triangle.radians)
 
         
         //calculate lable starting point for rotation around center
@@ -272,7 +310,7 @@ class DrawView : UIView{
         //Create angle arcs
         let arc = UIBezierPath()
         let arc2 = UIBezierPath()
-        let arc3 = UIBezierPath()
+        
         
         UIColor.black.setStroke()
         
@@ -280,11 +318,12 @@ class DrawView : UIView{
         arc.stroke()
         
         let start = CGFloat(90 * Triangle.radians);
-        let end = CGFloat(start + CGFloat((triangle.aa ?? 0) * Triangle.radians))
+        let end = CGFloat(start + CGFloat((triangle.aa) * Triangle.radians))
         
         arc2.addArc(withCenter: startPoint, radius: 10, startAngle:CGFloat(90 * Triangle.radians), endAngle:end, clockwise: true)
         arc2.stroke()
         
+        let arc3 = UIBezierPath()
         arc3.addArc(withCenter: rightPoint, radius: 10, startAngle:CGFloat(Double.pi), endAngle:CGFloat((3*Double.pi)/2), clockwise: true)
         arc3.stroke()
         
@@ -297,18 +336,18 @@ class DrawView : UIView{
                                size:CGSize(width: 30, height: 20))
         
         angleLabel.font = angleFont
-        angleLabel.text = String(Int(round(triangle.oa!)))+"°"
+        angleLabel.text = String(Int(round(triangle.oa)))+"°"
         angleLabel.frame = angleRect
         angleLabel.textAlignment = .center
         
         angle2Label.font = angleFont
-        angle2Label.text = String(Int(round(triangle.aa!)))+"°"
+        angle2Label.text = String(Int(round(triangle.aa)))+"°"
         angle2Label.frame = angleRect
         angle2Label.frame.origin = startPoint
         angle2Label.textAlignment = .center
         
         angle3Label.font = angleFont
-        angle3Label.text = String(Int(round(triangle.rightAngle)))+"°"
+        angle3Label.text = String(Int(round(Triangle.rightAngle)))+"°"
         angle3Label.frame = angleRect
         angle3Label.frame.origin = rightPoint
         angle2Label.textAlignment = .center
@@ -333,11 +372,9 @@ class DrawView : UIView{
         //Create arithmetic label
         let arithLabel = UILabel()
         
-        if let oa = triangle.oa, let aa = triangle.aa, let angleSum = triangle.sum {
-        arithLabel.text = "\(String(Int(round(oa))))° + \(String(Int(round(aa))))° + \(String(Int(round(triangle.rightAngle))))° = \(String(Int(angleSum)))°"
-        } else {
-            print("something was nil")
-        }
+        
+        arithLabel.text = "\(String(Int(round(triangle.oa))))° + \(String(Int(round(triangle.aa))))° + \(String(Int(round(Triangle.rightAngle))))° = \(String(Int(triangle.sum)))°"
+        
         arithLabel.frame = CGRect(origin: thetaPoint,
                                   size:CGSize(width: Int(triangle.a), height: 20))
         
@@ -351,3 +388,6 @@ class DrawView : UIView{
 let vc = ViewController()
 
 PlaygroundPage.current.liveView = vc.view
+
+let brokenTriangle = Triangle(opposite: 34, adjacent: 56)
+brokenTriangle.recalculate()
