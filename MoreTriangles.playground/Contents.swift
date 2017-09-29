@@ -14,17 +14,26 @@ enum Triangles{
 
 class CGTriangle {
     
+    //GD points of triangle
     private var A:CGPoint = CGPoint(x: 0, y: 0)
     private var B:CGPoint = CGPoint(x: 0, y: 0)
     private var C:CGPoint = CGPoint(x: 0, y: 0)
     
+    //lengths of sides
     private var la:CGFloat = 0.0
     private var lb:CGFloat = 0.0
     private var lc:CGFloat = 0.0
     
+    //inner angles of triangle
     private var aa:CGFloat = 0.0
     private var ab:CGFloat = 0.0
     private var ac:CGFloat = 0.0
+    
+    
+    //inverse obtuse angles of triangle
+    private var iaa:CGFloat = 0.0
+    private var iab:CGFloat = 0.0
+    private var iac:CGFloat = 0.0
     
     var longestSide:CGFloat = 0.0
     
@@ -49,6 +58,10 @@ class CGTriangle {
         aa = acos((pow(la, 2) + pow(lb, 2) - pow(lc, 2)) / (2 * la*lb))
         ab = acos((pow(lb, 2) + pow(lc, 2) - pow(la, 2)) / (2 * lb*lc))
         ac = acos((pow(lc, 2) + pow(la, 2) - pow(lb, 2)) / (2 * lc*la))
+        
+        iaa = CGFloat(.pi - aa)
+        iab = CGFloat(.pi - ab)
+        iac = CGFloat(.pi - ac)
         
         print("\(CGTriangle.radToDegrees(aa)) + \(CGTriangle.radToDegrees(ab)) + \(CGTriangle.radToDegrees(ac)) = \(CGTriangle.radToDegrees(aa)+CGTriangle.radToDegrees(ab)+CGTriangle.radToDegrees(ac))")
         
@@ -81,6 +94,8 @@ class CGTriangle {
         let yDist = a.y - b.y
         return CGFloat(sqrt((xDist * xDist) + (yDist * yDist)))
     }
+    
+    static let radians:Float = Float(Double.pi / 180);
     
     func returnTestPoint()->CGPoint{
         
@@ -213,7 +228,7 @@ class DrawView : UIView{
             
             UIColor.white.setStroke()
             
-            arc.addArc(withCenter: startPoint, radius: 10, startAngle:angles.0, endAngle:0, clockwise: false)
+            arc.addArc(withCenter: startPoint, radius: 10, startAngle:angles.1, endAngle:0, clockwise: false)
             arc.stroke()
             
 //            let start = CGFloat(90 * Triangle.radians);
