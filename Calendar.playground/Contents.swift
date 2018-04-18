@@ -4,8 +4,8 @@ import UIKit
 import PlaygroundSupport
 
 struct CalDimensions {
-    let height:Int = 350
-    let width:Int = 350
+    let height:Int = 378
+    let width:Int = 378
     let month:Int = 4
 }
 
@@ -24,6 +24,7 @@ class CalendarViewController : UIViewController {
     
     var calDimensions = CalDimensions()
     var calendarView:UIView!
+    var slider:UISlider!
     override func loadView() {
         let view = UIView()
         view.backgroundColor = .white
@@ -38,14 +39,13 @@ class CalendarViewController : UIViewController {
     }
     
     override func viewDidLoad() {
-      
-        loadCalendarLayout(month:calDimensions.month)
         loadSlider(month:calDimensions.month)
+        loadCalendarLayout(month:calDimensions.month)
     }
     
     func loadSlider(month:Int){
         let sliderFrame = CGRect(x: 0, y: calDimensions.height, width: calDimensions.height, height: 30)
-        let slider = UISlider(frame: sliderFrame)
+        slider = UISlider(frame: sliderFrame)
         slider.maximumValue = 12
         slider.minimumValue = 1
         slider.value = Float(month)
@@ -57,11 +57,13 @@ class CalendarViewController : UIViewController {
     
     @objc func sliderChanged(_ sender:Any){
         let slider = sender as! UISlider;
+        slider.isEnabled = false
         let month = slider.value.rounded()
         slider.value = month
         print(month)
         calendarView.removeFromSuperview()
         loadCalendarLayout(month: Int(month))
+        
     }
     
     func loadCalendarLayout(month:Int){
@@ -116,6 +118,7 @@ class CalendarViewController : UIViewController {
             calView.addSubview(day)
             
         }
+        slider.isEnabled = true
         
     }
     
