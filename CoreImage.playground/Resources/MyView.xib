@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="13771" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="13771"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <customObject id="-2" userLabel="File's Owner"/>
+        <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
+        <customObject id="-3" userLabel="Application" customClass="NSObject"/>
+        <customView id="c22-O7-iKe">
+            <rect key="frame" x="0.0" y="0.0" width="640" height="480"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+            <subviews>
+                <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" tag="1" translatesAutoresizingMaskIntoConstraints="NO" id="Acu-EO-ydd">
+                    <rect key="frame" x="0.0" y="0.0" width="640" height="480"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="480" id="WyZ-4H-xSv"/>
+                        <constraint firstAttribute="width" constant="640" id="zhv-1N-fCf"/>
+                    </constraints>
+                    <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="IMG_0495" id="cvN-sH-e6U"/>
+                </imageView>
+            </subviews>
+            <constraints>
+                <constraint firstItem="Acu-EO-ydd" firstAttribute="leading" secondItem="c22-O7-iKe" secondAttribute="leading" id="4yA-oh-Sbw"/>
+                <constraint firstAttribute="bottom" secondItem="Acu-EO-ydd" secondAttribute="bottom" id="PMR-hX-ZRN"/>
+                <constraint firstAttribute="trailing" secondItem="Acu-EO-ydd" secondAttribute="trailing" id="c3D-mK-vTa"/>
+                <constraint firstItem="Acu-EO-ydd" firstAttribute="top" secondItem="c22-O7-iKe" secondAttribute="top" id="zBu-Rm-zvL"/>
+            </constraints>
+        </customView>
+    </objects>
+    <resources>
+        <image name="IMG_0495" width="1600" height="1060"/>
+    </resources>
+</document>
