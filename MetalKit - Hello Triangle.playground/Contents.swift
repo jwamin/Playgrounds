@@ -98,8 +98,26 @@ class MetalRenderer:NSObject,MTKViewDelegate {
         if(rotationAngle>360.0){
             rotationAngle = 0.0
         }
-        rotationAngle
-        let glrotationMatrix = GLKMatrix4MakeRotation(GLKMathDegreesToRadians(rotationAngle), 0.0, 1.0, 0.0)
+        //rotationAngle
+        let glrotationMatrix = GLKMatrix4MakeRotation(GLKMathDegreesToRadians(rotationAngle), 1.0, 1.0, 1.0)
+        
+        //let quart = simd_quatf(rotationMatrix)
+        
+        let axis:simd_float3 = simd_float3(0.0, 0.0, 1.0)
+        
+        let originVector = simd_float3(x: 0, y: 0, z: 1)
+        
+        let angle = GLKMathDegreesToRadians(rotationAngle)
+        
+        let quaternion = simd_quatf(angle: angle, axis: axis)
+        
+        let rotated = simd_act(quaternion, axis)
+        
+        //let transormedVertex = swiftVertexData.map{return quart.act($0)}
+        
+        //let quart2 = simd_quatf(angle: .pi * GLKMathDegreesToRadians(rotationAngle), axis: )
+        
+        //rotationMatrix = simd_act(rotated, rotationMatrix)
         
         //reincorporate matrix here
         // assigning the matrix appears to be the expensive operation

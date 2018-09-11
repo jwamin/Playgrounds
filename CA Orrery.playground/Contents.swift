@@ -102,6 +102,13 @@ class ViewController : UIViewController{
     var displayLink:CADisplayLink!
     var animView:PathView!
     
+    /// Minimum scale to which the user may 'pinch to zoom'
+    private let maxScaleLimit: CGFloat = 4
+    /// Maximum scale to which the user may 'pinch to zoom'
+    private let minScaleLimit: CGFloat = 0.3
+    /// Variable to track how far the spiralView has been cumulatively scaled
+    private var animViewCumulativeScale: CGFloat = 1.0
+    
     override func loadView() {
         
         self.view = UIView()
@@ -118,6 +125,33 @@ class ViewController : UIViewController{
         
         //animView.startAnimation()
         print(animView.constraints)
+        
+        let pinchGesture = UIPinchGestureRecognizer(target: self, action: #selector(zoom(gestureRecognizer:)))
+        self.view.addGestureRecognizer(pinchGesture)
+        
+        let tapgestureRecogniser = UITapGestureRecognizer(target: self, action: #selector(tap(tap:)))
+        self.view.addGestureRecognizer(tapgestureRecogniser)
+        
+        let panGesture = UIPanGestureRecognizer(target: self, action: #selector(pan(gestureRecognizer:)))
+        self.view.addGestureRecognizer(panGesture)
+        
+    }
+    
+    @objc func tap(tap:UITapGestureRecognizer){
+        print("tap")
+        animView.showLine = !animView.showLine
+    }
+    
+    @objc func pan(gestureRecognizer: UIPanGestureRecognizer) {
+        guard let animView = animView else { return }
+        
+        let translation = gestureRecognizer.translation(in: view)
+        
+        animView.center = CGPoint(x: animView.center.x + translation.x,
+                                    y: animView.center.y + translation.y)
+        
+        gestureRecognizer.setTranslation(CGPoint(x: 0, y: 0), in: view)
+        
     }
     
     let tempConstantForLayoutScaling:CGFloat = 700.0
@@ -171,6 +205,41 @@ class ViewController : UIViewController{
         //(self.view as! PathView).togglewidth()
     }
     
+    // MARK: Gesture recognizer handling
+    
+    @objc func zoom(gestureRecognizer: UIPinchGestureRecognizer) {
+        guard let animView = animView else { return }
+        
+        if gestureRecognizer.state == .changed || gestureRecognizer.state == .ended {
+            
+            // Ensure the cumulative scale is within the set range
+            if animViewCumulativeScale > minScaleLimit && animViewCumulativeScale < maxScaleLimit {
+                
+                // Increment the scale
+                animViewCumulativeScale *= gestureRecognizer.scale
+                
+                // Execute the transform
+                animView.transform = animView.transform.scaledBy(x: gestureRecognizer.scale,
+                                                                     y: gestureRecognizer.scale);
+            } else {
+                // If the cumulative scale has extended beyond the range, check
+                // to see if the user is attempting to scale it back within range
+                let nextScale = animViewCumulativeScale * gestureRecognizer.scale
+                
+                if animViewCumulativeScale < minScaleLimit && nextScale > minScaleLimit
+                    || animViewCumulativeScale > maxScaleLimit && nextScale < maxScaleLimit {
+                    
+                    // If the user is trying to get back in-range, allow the transform
+                    animViewCumulativeScale *= gestureRecognizer.scale
+                    animView.transform = animView.transform.scaledBy(x: gestureRecognizer.scale,
+                                                                         y: gestureRecognizer.scale);
+                }
+            }
+        }
+        
+        //gestureRecognizer.scale = 1;
+    }
+    
 }
 
 class TriangleShapeLayer : CAShapeLayer {
@@ -191,6 +260,14 @@ class PathView : UIView {
     let parentLayer = CAShapeLayer()
     
     var orbitSublayers:[CAShapeLayer] = []
+    
+    var showLine:Bool = true {
+        didSet{
+            for layer in orbitSublayers{
+                layer.lineWidth = showLine ? 0.2 : 0.0
+            }
+        }
+    }
     
     var centerpoint:CGPoint! = CGPoint.zero
     override init(frame: CGRect) {
@@ -291,7 +368,7 @@ class PathView : UIView {
             
             shape.fillColor = nil
             
-            shape.lineWidth = 0.2
+            shape.lineWidth = (showLine) ? 0.2 : 0.0
             
             shape.strokeColor = UIColor.white.cgColor //planet.color.getColor().cgColor
             shape.path = bezPath.cgPath
