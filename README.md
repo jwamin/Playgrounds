@@ -10,7 +10,7 @@ Most of the following were created using Swift Playgrounds for iPad and might re
 
 * SceneKit Blender Import - Example of imported scene created with Blender and tweaked with Xcode scene editor.
 
-* SceneKit simd quaternion rotation - example of using quaternions to rotate an object around a sphere.
+* SceneKit `simd` quaternion rotation - example of using quaternions to rotate an object around a sphere.
 
 ## Augmented Reality
 
@@ -44,4 +44,4 @@ Most of the following were created using Swift Playgrounds for iPad and might re
 
 
 ### Techniques Used
-`UIKit` `CoreAnimation` `CoreGraphics` `ARKit` `Metal`
+`UIKit` `CoreAnimation` `CoreGraphics` `SceneKit` `ARKit` `Metal` `simd` `GLKit` `PlaygroundSupport`
