@@ -53,7 +53,7 @@ struct vertex {
         return [position.0,position.1,color.0,color.1,color.2,color.3] 
     }
 }
-5
+
 class MetalRenderer:NSObject,MTKViewDelegate {
     
     var mtkview:MTKView!
@@ -90,44 +90,6 @@ class MetalRenderer:NSObject,MTKViewDelegate {
         touchInProgress = touchStatus
     }
     
-    
-    
-    @objc func animationStep(){
-        
-        rotationAngle += 1.0
-        if(rotationAngle>360.0){
-            rotationAngle = 0.0
-        }
-        //rotationAngle
-        let glrotationMatrix = GLKMatrix4MakeRotation(GLKMathDegreesToRadians(rotationAngle), 1.0, 1.0, 1.0)
-        
-        //let quart = simd_quatf(rotationMatrix)
-        
-        let axis:simd_float3 = simd_float3(0.0, 0.0, 1.0)
-        
-        let originVector = simd_float3(x: 0, y: 0, z: 1)
-        
-        let angle = GLKMathDegreesToRadians(rotationAngle)
-        
-        let quaternion = simd_quatf(angle: angle, axis: axis)
-        
-        let rotated = simd_act(quaternion, axis)
-        
-        //let transormedVertex = swiftVertexData.map{return quart.act($0)}
-        
-        //let quart2 = simd_quatf(angle: .pi * GLKMathDegreesToRadians(rotationAngle), axis: )
-        
-        //rotationMatrix = simd_act(rotated, rotationMatrix)
-        
-        //reincorporate matrix here
-        // assigning the matrix appears to be the expensive operation
-        
-        rotationMatrix = unsafeBitCast(glrotationMatrix, to: float4x4.self)
-        
-        //rotationMatrix = identity
-        
-    }
-    
     init(metalView:MTKView,device:MTLDevice){
         super.init()
         self.mtkview = metalView
@@ -136,6 +98,7 @@ class MetalRenderer:NSObject,MTKViewDelegate {
         print(device.name)
         metalView.isPaused = true
         commandQueue = device.makeCommandQueue()
+        
         do {
             
             let library = try device.makeLibrary(source: shaders, options: nil)
@@ -148,11 +111,12 @@ class MetalRenderer:NSObject,MTKViewDelegate {
             fatalError("error loading shader lib")
         }
         self.mtkview.delegate = self
+        rotationMatrix = matrix_identity_float4x4
         
-            //not sure cadisplaylink is updating gpu draw method synchronously
-        link = CADisplayLink(target: self, selector: #selector(animationStep))
+        //not sure cadisplaylink is updating gpu draw method synchronously
+        //link = CADisplayLink(target: self, selector: #selector(animationStep))
         //link.preferredFramesPerSecond = 5
-        link.add(to: .current, forMode: .defaultRunLoopMode)
+        //link.add(to: .current, forMode: RunLoop.Mode.default)
         
         //var swiftVertexData = Array<Float>()
         //var swiftWhiteVertexData = Array<Float>()
@@ -161,7 +125,7 @@ class MetalRenderer:NSObject,MTKViewDelegate {
             swiftVertexData += vertex.floatBuffer()
             swiftwhitevertexdata += swiftVerticesWhite[index].floatBuffer()
         }
-        metalView.isPaused = false
+        //metalView.isPaused = false
     }
     
     func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
@@ -175,16 +139,31 @@ class MetalRenderer:NSObject,MTKViewDelegate {
         guard let passDescriptor = view.currentRenderPassDescriptor else { return }
         guard let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: passDescriptor) else { return }
         
+        //animationStep()
+        
+        rotationAngle += 1.0
+        if(rotationAngle>360.0){
+            rotationAngle = 0.0
+        }
+        
+        let rotationRadians = GLKMathDegreesToRadians(rotationAngle)
+        
+        //rotate x using simd
+        rotationMatrix.columns.0 = [cos(rotationRadians),-sin(rotationRadians),0,0]
+        rotationMatrix.columns.1 = [sin(rotationRadians),cos(rotationRadians),0,0]
+        
         let color = (touchInProgress) ? swiftVertexData : swiftwhitevertexdata
         
-        encoder.setVertexBytes(color, length: swiftVertexData.count * MemoryLayout.size(ofValue: swiftVertexData), index: 0)
+        encoder.setVertexBytes(color, length: swiftVertexData.count * MemoryLayout<vertex>.stride, index: 0)
         
-        encoder.setVertexBytes(&drawableSize, length: MemoryLayout.size(ofValue: drawableSize), index: 1)
+        encoder.setVertexBytes(&drawableSize, length: MemoryLayout<vector_uint2>.stride, index: 1)
         
-        encoder.setVertexBytes(&rotationMatrix, length: MemoryLayout.size(ofValue: rotationMatrix), index: 2)
+        encoder.setVertexBytes(&rotationMatrix, length: MemoryLayout<float4x4>.stride, index: 2)
         
         encoder.setRenderPipelineState(pipelineState)
+        
         encoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: 3)
+        
         encoder.endEncoding()
         commandBuffer.present(view.currentDrawable!)
         commandBuffer.commit()
@@ -196,7 +175,7 @@ class MetalRenderer:NSObject,MTKViewDelegate {
 class ViewController:UIViewController{
     
     var renderer:MetalRenderer?
-    var link:CADisplayLink!
+    //var link:CADisplayLink!
     
     
     var metalView:MTKView!{
@@ -222,7 +201,8 @@ class ViewController:UIViewController{
         let label = UILabel(frame: CGRect(origin: .zero, size: CGSize(width: 300, height: 100)))
         label.translatesAutoresizingMaskIntoConstraints = false
         label.numberOfLines = 0
-        label.text = device.name
+        device
+        label.text = "\(device.name)"
         label.textColor = #colorLiteral(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0)
         label.textAlignment = .center
         label.font = UIFont(name: "Helvetica Neue", size: 50.0)
@@ -234,10 +214,13 @@ class ViewController:UIViewController{
         NSLayoutConstraint(item: label, attribute: .width, relatedBy: .equal, toItem: metalView, attribute: .width, multiplier: 1.0, constant: 0)
             .isActive = true
         NSLayoutConstraint(item: label, attribute: .bottom, relatedBy: .equal, toItem: metalView, attribute: .bottomMargin, multiplier: 1.0, constant: -30).isActive = true
-        //metalView.isPaused = true
-        //metalView.enableSetNeedsDisplay = false
-            renderer = MetalRenderer(metalView: metalView, device: device)
+        renderer = MetalRenderer(metalView: metalView, device: device)
+        //metalView.preferredFramesPerSecond = 10
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
         
+        metalView.isPaused = false
     }
     
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
