@@ -104,7 +104,7 @@ class ViewController : UIViewController {
         print("view loaded")
         link = CADisplayLink(target: self, selector: #selector(update))
         link.preferredFramesPerSecond = 60
-        link.add(to: RunLoop.current, forMode: .defaultRunLoopMode)
+        link.add(to: RunLoop.current, forMode: .default)
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
