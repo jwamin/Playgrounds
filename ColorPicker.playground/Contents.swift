@@ -9,6 +9,8 @@ let envSim = false
 
 print(envSim)
 
+let stretchLayout:UIView.AutoresizingMask = [.flexibleWidth,.flexibleHeight] 
+
 class MyView : UIView {
     
     override init(frame: CGRect) {
@@ -51,6 +53,7 @@ class ViewController : UIViewController {
         let rect = CGRect(x: 0, y: 0, width: 100, height: 100)
         let newview = UIImageView(frame: rect)
         newview.image = #imageLiteral(resourceName: "IMG_2189.JPG")
+        newview.image
         newview.contentMode = .scaleAspectFill 
         newview.backgroundColor = UIColor.blue
         //stack.addArrangedSubview(newview)
@@ -63,16 +66,17 @@ class ViewController : UIViewController {
         let views = [newview,secondview]
         
         mainStackView = UIStackView(arrangedSubviews: views)
-        //mainStackView.autoresizingMask = [.flexibleHeight,.flexibleWidth]
+        
+        mainStackView.autoresizingMask = stretchLayout
         mainStackView.translatesAutoresizingMaskIntoConstraints = false
         
         
         mainStackView.axis = .vertical
         mainStackView.distribution = .fillEqually
         mainStackView.alignment = .fill
-        
+        //mainStackView.spacing = 10
         uiStackView = UIStackView()
-        uiStackView.autoresizingMask = [.flexibleWidth,.flexibleHeight]
+        uiStackView.autoresizingMask = stretchLayout
         
         
         uiStackView.axis = .vertical
@@ -81,7 +85,6 @@ class ViewController : UIViewController {
         uiStackView.alignment = .fill
         
         view.addSubview(mainStackView!)
-        
         mainStackView.arrangedSubviews[1].addSubview(uiStackView)
         uiStackView.frame = mainStackView.arrangedSubviews[1].frame
         setupConstraints()
@@ -90,8 +93,6 @@ class ViewController : UIViewController {
         setupLabels()
         setupSegmented()
         updateColor(nil)
-
-
 
 
     }
@@ -130,14 +131,15 @@ class ViewController : UIViewController {
         //segmentedControl.insertSegment(withTitle: "Swift", at: 0, animated: false)
         //segmentedControl.insertSegment(withTitle: "Objective-C", at: 1, animated: false)
         segmentedControl.selectedSegmentIndex = 0
+            
         let viewForCOntrol = UIView(frame: segmentedControl.frame)
         viewForCOntrol.addSubview(segmentedControl)
         
         uiStackView.insertArrangedSubview(viewForCOntrol, at: 0)
         //uiStackView.addArrangedSubview(viewForCOntrol)
         self.segmentedControl = segmentedControl
-        
-        self.segmentedControl.addTarget(self, action: #selector(updateText), for: UIControlEvents.valueChanged)
+        self.segmentedControl.isEnabled = true 
+        self.segmentedControl.addTarget(self, action: #selector(updateText), for: UIControl.Event.valueChanged)
         
         let textView = UITextView(frame: CGRect(origin: .zero, size: CGSize(width: self.view.frame.width, height: 10)))
         textView.font = UIFont(name: "Menlo", size: 11.0)
@@ -146,7 +148,7 @@ class ViewController : UIViewController {
         textView.isSelectable = true
         //textView.backgroundColor = UIColor.black
         uiStackView.addArrangedSubview(textView)
-        
+        //uiStackView.insertArrangedSubview(segmentedControl, at: 0)
         uiStackView.layoutIfNeeded()
 
     }
@@ -164,26 +166,36 @@ class ViewController : UIViewController {
     func setupSliders(){
         
         
-        var sliders:[UISlider] = []
+        var sliders:[UIView] = []
         for space in spaces{
-            let slider = UISlider()
-            
+            let view = UIView(frame: CGRect(origin: .zero, size: CGSize(width: 100, height: 20.0)))
+            view.autoresizingMask = [.flexibleWidth,.flexibleHeight]
+            let slider = UISlider(frame: view.bounds)
+            slider.autoresizingMask = [.flexibleWidth,.flexibleHeight]
+            view.addSubview(slider)
             slider.minimumValue = 0
             slider.maximumValue = 255
-            slider.addTarget(self, action: #selector(updateColor(_:)), for: UIControlEvents.valueChanged)
             
+            slider.addTarget(self, action: #selector(updateColor(_:)), for: UIControl.Event.valueChanged)
+            
+            //slider.layer.backgroundColor = UIColor.red.cgColor
             slider.isContinuous = false
             sliders.append(slider)
-            
+            print(sliders.count)
+            self.sliders = self.sliders ?? []
+            self.sliders.append(slider)
+            uiStackView.addArrangedSubview(view)
+            //uiStackView.arrangedSubviews.count
         }
-        uiStackView.addArrangedSubview(sliders[0])
-        uiStackView.addArrangedSubview(sliders[1])
-        uiStackView.addArrangedSubview(sliders[2])
-        uiStackView.addArrangedSubview(sliders[3])
-        sliders[sliders.count-1].value = 255.0
+        //uiStackView.addArrangedSubview(sliders[0])
+        //uiStackView.addArrangedSubview(sliders[1])
+        //uiStackView.addArrangedSubview(sliders[2])
+        //uiStackView.addArrangedSubview(sliders[3])
+        self.sliders[sliders.count-1].value = 255.0
         
-        self.sliders = sliders
-
+        //self.sliders = sliders
+        uiStackView.arrangedSubviews.count
+        uiStackView.backgroundColor = UIColor.blue
         
     }
 

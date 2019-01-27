@@ -12,11 +12,25 @@ Most of the following were created using Swift Playgrounds for iPad and might re
 
 * SceneKit `simd` quaternion rotation - example of using quaternions to rotate an object around a sphere.
 
+## Metal Performance Shaders
+
+* `MetalPerformanceShaders` implementation of Gaussian Blur function, with interactive slider.
+
 ## Augmented Reality
 
 * ARKit ImageTracking - Setup an `ARKit` session to look for `ARReferenceImages` within Playgrounds.
 
+## Playground Support
+
+* Size of Liveview, a prototype updating view showing the dimensions of the `PlaygroundSupport` liveview.
+
+## API Data
+
+* Pokemon animation - DispatchGroup and URLSessions used to do requests to an open Pokemon data API. Presents results as looping animation when done.
+
 ## User Interface
+
+* UIKit - Basic implementation of common controls; `UITableView`, `UICollectionView` utilising `UICollectionViewFlowLayout`
 
 * ColorPicker - An 'app within an app'. Create RGBA colors with sliders and export via string to Swift and Objective-C `UIColor`. `UIStackView` used for layout with various `UIKit` controls for input.
 
@@ -25,6 +39,8 @@ Most of the following were created using Swift Playgrounds for iPad and might re
 ## Drawing and Animation
 
 * CA Orrery - A solar system animation created with `Core Animation`
+
+* Animations with layout constraints and visual layout.
 
 * Apple Park Drawing - Core Graphics drawing with CAGradientLayer masking.
 
