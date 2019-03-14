@@ -46,9 +46,11 @@ Most of the following were created using Swift Playgrounds for iPad and might re
 
 * Spring Animation vs. Ease-In-Out - Simple demo of two types of animation timing. Remember to use spring animations!
 
-## General Techniques
+## General Techniques / Foundation
 
 * Timers, Implemented with `Timer` and `CADisplayLink`
+
+* Codec - Decoding and encoding of nested JSON REST API response using `Codable`
 
 * GCD Threading - `Grand Central Dispatch` example
 
