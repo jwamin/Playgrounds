@@ -4,6 +4,10 @@ Playgrounds for iPad is an amazing app for trying out techniques and prototyping
 
 Most of the following were created using Swift Playgrounds for iPad and might require some tweaking to run in Xcode Playgrounds.
 
+## Labs
+
+* Ladders - A work in progress. Snakes and ladders / Chutes and ladders game implemented in Playgrounds 3. 
+
 ## 3D Graphics
 
 * Metal - Hello Triangle - A very slow but fully working example of how to implement `Metal` within Playgrounds, complete with shader! - Will Probably need Swift Playgrounds on iPad to run as Metal requires a physical device and won't run in a simulator, but could be adapted to the Mac.
